@@ -1,0 +1,8 @@
+# Firebase Secret Key
+serviceAccountKey.json
+
+# Python environment & cache
+__pycache__/
+*.py[cod]
+venv/
+.env
