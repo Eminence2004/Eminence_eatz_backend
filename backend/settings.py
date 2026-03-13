@@ -17,7 +17,7 @@ if not firebase_admin._apps:
 
 # 3. SECURITY SETTINGS
 SECRET_KEY = 'django-insecure-t%9e=%@=6*(rh765lnw@3#8zii-zs)unh-!79+$4zi2*#t0cev'
-DEBUG = True
+DEBUG = False
 ALLOWED_HOSTS = ['*'] 
 
 # 4. APP DEFINITION
@@ -94,7 +94,11 @@ PAYSTACK_SECRET_KEY = "sk_test_f0248b82e35f065fe3b93ffcd0f2ad177eb2b530"
 PAYSTACK_BASE_URL = "https://api.paystack.co"
 
 # 9. STATIC & MEDIA
-STATIC_URL = 'static/'
+# Static files
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Media files (user uploads)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
