@@ -16,7 +16,7 @@ if not firebase_admin._apps:
         print("WARNING: serviceAccountKey.json not found! Firebase Auth will fail.")
 
 # 3. SECURITY SETTINGS
-SECRET_KEY = 'django-insecure-t%9e=%@=6*(rh765lnw@3#8zii-zs)unh-!79+$4zi2*#t0cev'
+SECRET_KEY = 'django-insecure-xxxxxxxxxxxxxxxxxxxxxxxxxxxx'
 DEBUG = False
 ALLOWED_HOSTS = ['*'] 
 
@@ -90,7 +90,8 @@ REST_FRAMEWORK = {
 CORS_ALLOW_ALL_ORIGINS = True 
 
 # 8. PAYSTACK KEYS
-PAYSTACK_SECRET_KEY = "sk_test_f0248b82e35f065fe3b93ffcd0f2ad177eb2b530"
+PAYSTACK_PUBLIC_KEY = os.environ.get("PAYSTACK_PUBLIC_KEY")
+PAYSTACK_SECRET_KEY = os.environ.get("PAYSTACK_SECRET_KEY")
 PAYSTACK_BASE_URL = "https://api.paystack.co"
 
 # 9. STATIC & MEDIA
@@ -104,11 +105,11 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # 10. EMAIL CONFIGURATION
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'danielkyerematengamartey@gmail.com' 
-EMAIL_HOST_PASSWORD = 'zygs wvvv qrkk sjrt'
+EMAIL_HOST = os.environ.get("EMAIL_HOST")  # e.g., smtp.gmail.com
+EMAIL_PORT = os.environ.get("EMAIL_PORT", 587)
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True") == "True"
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 
 # 11. JAZZMIN SETTINGS
 JAZZMIN_SETTINGS = {
