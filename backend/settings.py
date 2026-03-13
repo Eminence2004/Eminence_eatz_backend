@@ -1,45 +1,61 @@
 import os
+import json
+import base64
 from pathlib import Path
 import firebase_admin
 from firebase_admin import credentials
 
+# ------------------------------
 # 1. BASE DIRECTORY
+# ------------------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# 2. FIREBASE INITIALIZATION 
-cred_path = os.path.join(BASE_DIR, 'serviceAccountKey.json')
+# ------------------------------
+# 2. SECURITY SETTINGS
+# ------------------------------
+SECRET_KEY = os.environ.get("SECRET_KEY", "fallback-local-secret-key")
+DEBUG = os.environ.get("DEBUG", "False") == "True"
+ALLOWED_HOSTS = ['*']
+
+# ------------------------------
+# 3. FIREBASE INITIALIZATION
+# ------------------------------
+firebase_base64 = os.environ.get("FIREBASE_KEY_BASE64")  # Base64-encoded JSON (optional)
+firebase_json_path = os.path.join(BASE_DIR, "serviceAccountKey.json")  # Local dev
+
 if not firebase_admin._apps:
-    if os.path.exists(cred_path):
-        cred = credentials.Certificate(cred_path)
+    if firebase_base64:
+        service_account_info = json.loads(base64.b64decode(firebase_base64))
+        cred = credentials.Certificate(service_account_info)
+        firebase_admin.initialize_app(cred)
+    elif os.path.exists(firebase_json_path):
+        cred = credentials.Certificate(firebase_json_path)
         firebase_admin.initialize_app(cred)
     else:
-        print("WARNING: serviceAccountKey.json not found! Firebase Auth will fail.")
+        print("WARNING: Firebase credentials not found! Firebase Auth will fail.")
 
-# 3. SECURITY SETTINGS
-SECRET_KEY = 'django-insecure-xxxxxxxxxxxxxxxxxxxxxxxxxxxx'
-DEBUG = False
-ALLOWED_HOSTS = ['*'] 
-
+# ------------------------------
 # 4. APP DEFINITION
+# ------------------------------
 INSTALLED_APPS = [
-    'jazzmin', # Must be at the top
+    'jazzmin',  # Must be at top
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+
     # Third Party
     'rest_framework',
-    'corsheaders', 
-    
+    'corsheaders',
+
     # Local Apps
     'orders',
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware', # Must be first
+    'corsheaders.middleware.CorsMiddleware',  # Must be first
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -51,12 +67,14 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'backend.urls'
 
-# 5. FIXED TEMPLATES SECTION
+# ------------------------------
+# 5. TEMPLATES
+# ------------------------------
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [os.path.join(BASE_DIR, 'templates')],
-        'APP_DIRS': True, # Required for Admin and Jazzmin
+        'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -70,7 +88,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
+# ------------------------------
 # 6. DATABASE
+# ------------------------------
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -78,40 +98,48 @@ DATABASES = {
     }
 }
 
+# ------------------------------
 # 7. REST FRAMEWORK & CORS
+# ------------------------------
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'orders.authentication.FirebaseAuthentication', 
+        'orders.authentication.FirebaseAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ]
 }
-CORS_ALLOW_ALL_ORIGINS = True 
+CORS_ALLOW_ALL_ORIGINS = True
 
+# ------------------------------
 # 8. PAYSTACK KEYS
+# ------------------------------
 PAYSTACK_PUBLIC_KEY = os.environ.get("PAYSTACK_PUBLIC_KEY")
 PAYSTACK_SECRET_KEY = os.environ.get("PAYSTACK_SECRET_KEY")
 PAYSTACK_BASE_URL = "https://api.paystack.co"
 
+# ------------------------------
 # 9. STATIC & MEDIA
-# Static files
+# ------------------------------
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Media files (user uploads)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+# ------------------------------
 # 10. EMAIL CONFIGURATION
+# ------------------------------
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = os.environ.get("EMAIL_HOST")  # e.g., smtp.gmail.com
+EMAIL_HOST = os.environ.get("EMAIL_HOST")
 EMAIL_PORT = os.environ.get("EMAIL_PORT", 587)
 EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True") == "True"
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 
+# ------------------------------
 # 11. JAZZMIN SETTINGS
+# ------------------------------
 JAZZMIN_SETTINGS = {
     "site_title": "Eminence Eatz Admin",
     "site_header": "Eminence Eatz",
@@ -122,7 +150,7 @@ JAZZMIN_SETTINGS = {
     "show_sidebar": True,
     "navigation_expanded": True,
     "topmenu_links": [
-        {"name": "Home",  "url": "admin:index", "permissions": ["auth.view_user"]},
+        {"name": "Home", "url": "admin:index", "permissions": ["auth.view_user"]},
         {"name": "View Site", "url": "/"},
     ],
     "icons": {
