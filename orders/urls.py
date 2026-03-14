@@ -30,6 +30,5 @@ urlpatterns = [
     path('pay/<int:order_id>/', start_paystack_payment, name='pay-start'),
     path('verify-payment/<str:reference>/', verify_paystack_payment, name='pay-verify'),
 
-    # Misc
-    path('calculate-eta/', calculate_delivery_eta, name='calculate-eta'),
+    
 ]
