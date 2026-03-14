@@ -1,15 +1,13 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+from . import views
 from .views import (
-    RestaurantListView, 
-    MenuItemViewSet, 
-    OrderViewSet, 
-    PaymentViewSet, 
-    start_paystack_payment, 
+    RestaurantListView,
+    MenuItemViewSet,
+    OrderViewSet,
+    PaymentViewSet,
+    start_paystack_payment,
     verify_paystack_payment,
-    register_user, 
-    login_user,
-    verify_otp, 
     calculate_delivery_eta
 )
 
@@ -21,7 +19,7 @@ router.register(r'payments', PaymentViewSet, basename='payment')
 urlpatterns = [
     path('', include(router.urls)),
     path('restaurants/', RestaurantListView.as_view(), name='restaurant-list'),
-    
+
     # Auth
     path('register/', views.register_user, name='register'),
     path('send-otp/', views.send_otp, name='send_otp'),
