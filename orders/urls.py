@@ -8,7 +8,6 @@ from .views import (
     PaymentViewSet,
     start_paystack_payment,
     verify_paystack_payment,
-    calculate_delivery_eta
 )
 
 router = DefaultRouter()
