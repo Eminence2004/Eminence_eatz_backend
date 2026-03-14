@@ -4,6 +4,7 @@ import base64
 from pathlib import Path
 import firebase_admin
 from firebase_admin import credentials
+import dj_database_url
 
 # ------------------------------
 # 1. BASE DIRECTORY
@@ -91,12 +92,12 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 # ------------------------------
 # 6. DATABASE
-# ------------------------------
+# -----------------------------
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=os.environ.get('postgresql://eminence_eatz_db_user:xp6YDE7Sk44Gg5EARblwCbdx0Kj3N1nP@dpg-d6ps0rvgi27c73bfn7d0-a/eminence_eatz_db'),
+        conn_max_age=600
+    )
 }
 
 # ------------------------------
