@@ -1,7 +1,5 @@
 import os
 from decimal import Decimal
-import random
-from django.core.cache import cache
 from twilio.rest import Client
 from django.contrib.auth.models import User
 from django.utils import timezone
@@ -16,7 +14,6 @@ from .models import Restaurant, MenuItem, Order, Payment, Profile
 from .serializers import (
     RestaurantSerializer, MenuItemSerializer, OrderSerializer, PaymentSerializer
 )
-from .utils import generate_otp
 from .paystack import initialize_transaction, verify_transaction
 
 # --- CRUD VIEWS ---
@@ -66,25 +63,26 @@ def start_paystack_payment(request, order_id):
     food_total = sum(item.price for item in order.items.all())
     delivery_fee = Decimal(15.00)
     total = food_total + delivery_fee
-    
+
     order.total_price = total
     order.save()
 
     amount_in_pesewas = int(total * 100)
 
     res = initialize_transaction(
-        user_email, 
-        amount_in_pesewas, 
+        user_email,
+        amount_in_pesewas,
         order.id
     )
 
     if res.get("status"):
         return Response({
-            "authorization_url": res["data"]["authorization_url"], 
+            "authorization_url": res["data"]["authorization_url"],
             "reference": res["data"]["reference"]
         })
-    
+
     return Response({"error": res.get("message", "Paystack error")}, status=400)
+
 
 @api_view(['GET'])
 def verify_paystack_payment(request, reference):
@@ -92,16 +90,30 @@ def verify_paystack_payment(request, reference):
     if res.get("status"):
         metadata = res["data"].get("metadata", {})
         oid = metadata.get("order_id")
-        
+
         if oid:
             Order.objects.filter(id=oid).update(status="PAID")
         return Response({"message": "Payment Verified Successfully"})
-    
+
     return Response({"error": "Payment verification failed"}, status=400)
 
 # =======================================
 #           AUTH & VERIFICATION
 # =======================================
+
+def get_twilio_client():
+    return Client(
+        os.environ.get('TWILIO_ACCOUNT_SID'),
+        os.environ.get('TWILIO_AUTH_TOKEN')
+    )
+
+def format_phone(phone):
+    if phone.startswith('0'):
+        phone = '+233' + phone[1:]
+    if not phone.startswith('+'):
+        phone = '+233' + phone
+    return phone
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -111,13 +123,18 @@ def register_user(request):
     password = request.data.get('password')
     phone = request.data.get('phone')
 
+    if not all([full_name, email, password, phone]):
+        return Response({'error': 'All fields are required'}, status=400)
+
+    phone = format_phone(phone)
+
     if User.objects.filter(username=phone).exists():
         return Response({'error': 'Phone number already registered'}, status=400)
 
     if User.objects.filter(email=email).exists():
         return Response({'error': 'Email already registered'}, status=400)
 
-    user = User.objects.create_user(
+    User.objects.create_user(
         username=phone,
         email=email,
         password=password,
@@ -135,27 +152,13 @@ def send_otp(request):
     if not phone:
         return Response({'error': 'Phone number required'}, status=400)
 
-    # Format phone number
-    if phone.startswith('0'):
-        phone = '+233' + phone[1:]
+    phone = format_phone(phone)
 
-    # Generate 6-digit OTP
-    otp = str(random.randint(100000, 999999))
-
-    # Save OTP in cache for 5 minutes
-    cache.set(f'otp_{phone}', otp, timeout=300)
-
-    # Send via Twilio
     try:
-        client = Client(
-            os.environ.get('TWILIO_ACCOUNT_SID'),
-            os.environ.get('TWILIO_AUTH_TOKEN')
-        )
-        client.messages.create(
-            body=f'Your Eminence Eatz verification code is: {otp}',
-            from_=os.environ.get('TWILIO_PHONE_NUMBER'),
-            to=phone
-        )
+        client = get_twilio_client()
+        client.verify.v2.services(
+            os.environ.get('TWILIO_VERIFY_SID')
+        ).verifications.create(to=phone, channel='sms')
         return Response({'message': 'OTP sent successfully'}, status=200)
     except Exception as e:
         return Response({'error': str(e)}, status=500)
@@ -167,28 +170,31 @@ def verify_otp(request):
     phone = request.data.get('phone')
     otp = request.data.get('otp')
 
-    if phone.startswith('0'):
-        phone = '+233' + phone[1:]
+    if not phone or not otp:
+        return Response({'error': 'Phone and OTP are required'}, status=400)
 
-    cached_otp = cache.get(f'otp_{phone}')
+    phone = format_phone(phone)
 
-    if cached_otp is None:
-        return Response({'error': 'OTP expired. Please request a new one.'}, status=400)
-
-    if cached_otp != otp:
-        return Response({'error': 'Invalid OTP'}, status=400)
-
-    # OTP correct — log the user in
     try:
-        user = User.objects.get(username=phone)
-        refresh = RefreshToken.for_user(user)
-        cache.delete(f'otp_{phone}')
-        return Response({
-            'access': str(refresh.access_token),
-            'refresh': str(refresh),
-        }, status=200)
-    except User.DoesNotExist:
-        return Response({'error': 'User not found'}, status=404)
+        client = get_twilio_client()
+        result = client.verify.v2.services(
+            os.environ.get('TWILIO_VERIFY_SID')
+        ).verification_checks.create(to=phone, code=otp)
+
+        if result.status == 'approved':
+            try:
+                user = User.objects.get(username=phone)
+                refresh = RefreshToken.for_user(user)
+                return Response({
+                    'access': str(refresh.access_token),
+                    'refresh': str(refresh),
+                }, status=200)
+            except User.DoesNotExist:
+                return Response({'error': 'User not found'}, status=404)
+        else:
+            return Response({'error': 'Invalid or expired OTP'}, status=400)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
 
 
 @api_view(['POST'])
@@ -196,27 +202,19 @@ def verify_otp(request):
 def login_send_otp(request):
     phone = request.data.get('phone')
 
-    if phone.startswith('0'):
-        phone = '+233' + phone[1:]
+    if not phone:
+        return Response({'error': 'Phone number required'}, status=400)
+
+    phone = format_phone(phone)
 
     if not User.objects.filter(username=phone).exists():
         return Response({'error': 'Account not found. Please register.'}, status=404)
 
-    # Reuse send_otp logic
-    otp = str(random.randint(100000, 999999))
-    cache.set(f'otp_{phone}', otp, timeout=300)
-
     try:
-        client = Client(
-            os.environ.get('TWILIO_ACCOUNT_SID'),
-            os.environ.get('TWILIO_AUTH_TOKEN')
-        )
-        client.messages.create(
-            body=f'Your Eminence Eatz login code is: {otp}',
-            from_=os.environ.get('TWILIO_PHONE_NUMBER'),
-            to=phone
-        )
+        client = get_twilio_client()
+        client.verify.v2.services(
+            os.environ.get('TWILIO_VERIFY_SID')
+        ).verifications.create(to=phone, channel='sms')
         return Response({'message': 'OTP sent'}, status=200)
     except Exception as e:
         return Response({'error': str(e)}, status=500)
-    
