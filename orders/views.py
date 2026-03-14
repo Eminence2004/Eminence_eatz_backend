@@ -103,50 +103,116 @@ def verify_paystack_payment(request, reference):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register_user(request):
-    try:
-        with transaction.atomic():
-            user = User.objects.create_user(
-                username=request.data['username'], 
-                email=request.data['email'], 
-                password=request.data['password']
-            )
-            user.save()
-            Profile.objects.create(user=user)
-            return Response({"message": "User registered successfully"}, status=201)
-    except Exception as e:
-        return Response({"error": str(e)}, status=400)
+    full_name = request.data.get('full_name')
+    email = request.data.get('email')
+    password = request.data.get('password')
+    phone = request.data.get('phone')
+
+    if User.objects.filter(username=phone).exists():
+        return Response({'error': 'Phone number already registered'}, status=400)
+
+    if User.objects.filter(email=email).exists():
+        return Response({'error': 'Email already registered'}, status=400)
+
+    user = User.objects.create_user(
+        username=phone,
+        email=email,
+        password=password,
+        first_name=full_name,
+    )
+
+    return Response({'message': 'User created successfully'}, status=201)
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def login_user(request):
-    """Checks if phone exists before Firebase sends SMS"""
-    phone = request.data.get('username')
-    if User.objects.filter(username=phone).exists():
-        return Response({"message": "User exists"}, status=200)
-    return Response({"error": "Account not found. Please register."}, status=404)
+def send_otp(request):
+    phone = request.data.get('phone')
+
+    if not phone:
+        return Response({'error': 'Phone number required'}, status=400)
+
+    # Format phone number
+    if phone.startswith('0'):
+        phone = '+233' + phone[1:]
+
+    # Generate 6-digit OTP
+    otp = str(random.randint(100000, 999999))
+
+    # Save OTP in cache for 5 minutes
+    cache.set(f'otp_{phone}', otp, timeout=300)
+
+    # Send via Twilio
+    try:
+        client = Client(
+            os.environ.get('TWILIO_ACCOUNT_SID'),
+            os.environ.get('TWILIO_AUTH_TOKEN')
+        )
+        client.messages.create(
+            body=f'Your Eminence Eatz verification code is: {otp}',
+            from_=os.environ.get('TWILIO_PHONE_NUMBER'),
+            to=phone
+        )
+        return Response({'message': 'OTP sent successfully'}, status=200)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def verify_otp(request):
     phone = request.data.get('phone')
+    otp = request.data.get('otp')
+
+    if phone.startswith('0'):
+        phone = '+233' + phone[1:]
+
+    cached_otp = cache.get(f'otp_{phone}')
+
+    if cached_otp is None:
+        return Response({'error': 'OTP expired. Please request a new one.'}, status=400)
+
+    if cached_otp != otp:
+        return Response({'error': 'Invalid OTP'}, status=400)
+
+    # OTP correct — log the user in
     try:
         user = User.objects.get(username=phone)
-        user.is_active = True
-        user.save()
-
         refresh = RefreshToken.for_user(user)
+        cache.delete(f'otp_{phone}')
         return Response({
-            "access": str(refresh.access_token), 
-            "refresh": str(refresh),
-            "message": "Login successful"
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
         }, status=200)
     except User.DoesNotExist:
-        return Response({"error": "User profile not found"}, status=404)
+        return Response({'error': 'User not found'}, status=404)
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def calculate_delivery_eta(request):
-    return Response({
-        "eta": f"{random.randint(15, 35)} mins", 
-        "status": random.choice(["Clear", "Moderate Traffic", "Heavy Traffic"])
-    })
+def login_send_otp(request):
+    phone = request.data.get('phone')
+
+    if phone.startswith('0'):
+        phone = '+233' + phone[1:]
+
+    if not User.objects.filter(username=phone).exists():
+        return Response({'error': 'Account not found. Please register.'}, status=404)
+
+    # Reuse send_otp logic
+    otp = str(random.randint(100000, 999999))
+    cache.set(f'otp_{phone}', otp, timeout=300)
+
+    try:
+        client = Client(
+            os.environ.get('TWILIO_ACCOUNT_SID'),
+            os.environ.get('TWILIO_AUTH_TOKEN')
+        )
+        client.messages.create(
+            body=f'Your Eminence Eatz login code is: {otp}',
+            from_=os.environ.get('TWILIO_PHONE_NUMBER'),
+            to=phone
+        )
+        return Response({'message': 'OTP sent'}, status=200)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)

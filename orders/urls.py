@@ -23,9 +23,10 @@ urlpatterns = [
     path('restaurants/', RestaurantListView.as_view(), name='restaurant-list'),
     
     # Auth
-    path('register/', register_user, name='register'),
-    path('login/', login_user, name='login'),
-    path('verify-otp/', verify_otp, name='verify-otp'),
+    path('register/', views.register_user, name='register'),
+    path('send-otp/', views.send_otp, name='send_otp'),
+    path('verify-otp/', views.verify_otp, name='verify_otp'),
+    path('login-otp/', views.login_send_otp, name='login_send_otp'),
 
     # Payments
     path('pay/<int:order_id>/', start_paystack_payment, name='pay-start'),
