@@ -29,7 +29,7 @@ urlpatterns = [
     path('pay/<int:order_id>/', start_paystack_payment, name='pay-start'),
     path('verify-payment/<str:reference>/', verify_paystack_payment, name='pay-verify'),
 
-    path('clear-users/', views.clear_test_users, name='clear-users'),
+
 
     
 ]

@@ -220,9 +220,3 @@ def login_send_otp(request):
     except Exception as e:
         return Response({'error': str(e)}, status=500)
     
-
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def clear_test_users(request):
-    User.objects.filter(is_superuser=False).delete()
-    return Response({'message': 'Cleared'}, status=200)    
