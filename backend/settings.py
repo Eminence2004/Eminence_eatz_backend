@@ -5,6 +5,7 @@ from pathlib import Path
 import firebase_admin
 from firebase_admin import credentials
 import dj_database_url
+import cloudinary
 
 # ------------------------------
 # 1. BASE DIRECTORY
@@ -45,11 +46,14 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'cloudinary_storage',
     'django.contrib.staticfiles',
+    'cloudinary',
 
     # Third Party
     'rest_framework',
     'corsheaders',
+    
 
     # Local Apps
     'orders',
@@ -99,6 +103,14 @@ DATABASES = {
         conn_max_age=600
     )
 }
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
+}
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 # ------------------------------
 # 7. REST FRAMEWORK & CORS
