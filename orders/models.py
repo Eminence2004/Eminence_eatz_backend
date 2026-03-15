@@ -41,6 +41,7 @@ class AppConfig(models.Model):
     welcome_title = models.CharField(max_length=100, default="Eminence Eatz")
     welcome_subtitle = models.TextField(default="Order your favorite meals from top restaurants in Ghana.")
     promo_text = models.CharField(max_length=100, default="FREE DELIVERY", blank=True)
+    delivery_fee = models.DecimalField(max_digits=6, decimal_places=2, default=00.00) 
 
     class Meta:
         verbose_name = "App Configuration"
