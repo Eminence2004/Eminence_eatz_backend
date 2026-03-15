@@ -1,10 +1,14 @@
 from django.contrib import admin
-from .models import Restaurant, MenuItem, Order, Payment
+from .models import Restaurant, MenuItem, Order, Payment, AppConfig
 
 @admin.register(Restaurant)
 class RestaurantAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'location', 'phone')
     search_fields = ('name', 'location')
+
+@admin.register(AppConfig)
+class AppConfigAdmin(admin.ModelAdmin):
+    list_display = ('id', 'welcome_title', 'welcome_subtitle', 'promo_text')
 
 @admin.register(MenuItem)
 class MenuItemAdmin(admin.ModelAdmin):

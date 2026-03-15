@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Restaurant, MenuItem, Order, Payment
 from django.contrib.auth.models import User
+from .models import AppConfig
 
 
 class MenuItemSerializer(serializers.ModelSerializer):
@@ -53,3 +54,9 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
+
+
+class AppConfigSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AppConfig
+        fields = '__all__'

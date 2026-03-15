@@ -218,3 +218,19 @@ def login_send_otp(request):
         return Response({'message': 'OTP sent'}, status=200)
     except Exception as e:
         return Response({'error': str(e)}, status=500)
+    
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_app_config(request):
+    from .models import AppConfig
+    config = AppConfig.objects.first()
+    if config:
+        from .serializers import AppConfigSerializer
+        return Response(AppConfigSerializer(config).data)
+    return Response({
+        'welcome_image': None,
+        'welcome_title': 'Eminence Eatz',
+        'welcome_subtitle': 'Order your favorite meals from top restaurants in Ghana.',
+        'promo_text': 'FREE DELIVERY',
+    })

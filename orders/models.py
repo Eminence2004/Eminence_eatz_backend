@@ -32,6 +32,22 @@ class MenuItem(models.Model):
     def __str__(self):
         return f"{self.name} ({self.restaurant.name})"
 
+
+# ---------------------------
+# Banner-screen Model
+# ---------------------------
+class AppConfig(models.Model):
+    welcome_image = models.ImageField(upload_to='app_config/', blank=True, null=True)
+    welcome_title = models.CharField(max_length=100, default="Eminence Eatz")
+    welcome_subtitle = models.TextField(default="Order your favorite meals from top restaurants in Ghana.")
+    promo_text = models.CharField(max_length=100, default="FREE DELIVERY", blank=True)
+
+    class Meta:
+        verbose_name = "App Configuration"
+
+    def __str__(self):
+        return "App Configuration"
+
 # ---------------------------
 # Order Model
 # ---------------------------
