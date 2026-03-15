@@ -57,6 +57,13 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
 
 class AppConfigSerializer(serializers.ModelSerializer):
+    welcome_image = serializers.SerializerMethodField()
+
     class Meta:
         model = AppConfig
         fields = '__all__'
+
+    def get_welcome_image(self, obj):
+        if obj.welcome_image:
+            return obj.welcome_image.url
+        return None
