@@ -1,9 +1,6 @@
 import os
 import json
 import base64
-import cloudinary
-import cloudinary.uploader
-import cloudinary.api
 from pathlib import Path
 import firebase_admin
 from firebase_admin import credentials
@@ -15,31 +12,14 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ------------------------------
-# 2. CLOUDINARY CONFIG (must be early)
-# ------------------------------
-cloudinary.config(
-    cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
-    api_key=os.environ.get('CLOUDINARY_API_KEY'),
-    api_secret=os.environ.get('CLOUDINARY_API_SECRET'),
-)
-
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
-    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
-    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
-}
-
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-
-# ------------------------------
-# 3. SECURITY SETTINGS
+# 2. SECURITY SETTINGS
 # ------------------------------
 SECRET_KEY = os.environ.get("SECRET_KEY", "fallback-local-secret-key")
 DEBUG = os.environ.get("DEBUG", "False") == "True"
 ALLOWED_HOSTS = ['*']
 
 # ------------------------------
-# 4. FIREBASE INITIALIZATION
+# 3. FIREBASE INITIALIZATION
 # ------------------------------
 firebase_base64 = os.environ.get("FIREBASE_KEY_BASE64")
 firebase_json_path = os.path.join(BASE_DIR, "serviceAccountKey.json")
@@ -56,7 +36,7 @@ if not firebase_admin._apps:
         print("WARNING: Firebase credentials not found! Firebase Auth will fail.")
 
 # ------------------------------
-# 5. APP DEFINITION
+# 4. APP DEFINITION
 # ------------------------------
 INSTALLED_APPS = [
     'jazzmin',
@@ -73,6 +53,20 @@ INSTALLED_APPS = [
     'orders',
 ]
 
+# ------------------------------
+# 5. CLOUDINARY CONFIG
+# ------------------------------
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
+}
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+# ------------------------------
+# 6. MIDDLEWARE
+# ------------------------------
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -88,7 +82,7 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'backend.urls'
 
 # ------------------------------
-# 6. TEMPLATES
+# 7. TEMPLATES
 # ------------------------------
 TEMPLATES = [
     {
@@ -109,17 +103,17 @@ TEMPLATES = [
 WSGI_APPLICATION = 'backend.wsgi.application'
 
 # ------------------------------
-# 7. DATABASE
+# 8. DATABASE
 # ------------------------------
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.environ.get('postgresql://eminence_eatz_db_user:xp6YDE7Sk44Gg5EARblwCbdx0Kj3N1nP@dpg-d6ps0rvgi27c73bfn7d0-a/eminence_eatz_db'),
+        default=os.environ.get('DATABASE_URL'),
         conn_max_age=600
     )
 }
 
 # ------------------------------
-# 8. REST FRAMEWORK & CORS
+# 9. REST FRAMEWORK & CORS
 # ------------------------------
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -132,14 +126,14 @@ REST_FRAMEWORK = {
 CORS_ALLOW_ALL_ORIGINS = True
 
 # ------------------------------
-# 9. PAYSTACK KEYS
+# 10. PAYSTACK KEYS
 # ------------------------------
 PAYSTACK_PUBLIC_KEY = os.environ.get("PAYSTACK_PUBLIC_KEY")
 PAYSTACK_SECRET_KEY = os.environ.get("PAYSTACK_SECRET_KEY")
 PAYSTACK_BASE_URL = "https://api.paystack.co"
 
 # ------------------------------
-# 10. STATIC & MEDIA
+# 11. STATIC & MEDIA
 # ------------------------------
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
@@ -150,7 +144,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # ------------------------------
-# 11. CACHE
+# 12. CACHE
 # ------------------------------
 CACHES = {
     'default': {
@@ -160,7 +154,7 @@ CACHES = {
 }
 
 # ------------------------------
-# 12. EMAIL CONFIGURATION
+# 13. EMAIL CONFIGURATION
 # ------------------------------
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.environ.get("EMAIL_HOST")
@@ -170,7 +164,7 @@ EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 
 # ------------------------------
-# 13. JAZZMIN SETTINGS
+# 14. JAZZMIN SETTINGS
 # ------------------------------
 JAZZMIN_SETTINGS = {
     "site_title": "Eminence Eatz Admin",
