@@ -1,7 +1,8 @@
+import os
 from rest_framework import serializers
 from .models import Restaurant, MenuItem, Order, Payment
 from django.contrib.auth.models import User
-from .models import AppConfig
+from .models import AppConfig 
 
 
 class MenuItemSerializer(serializers.ModelSerializer):
@@ -65,5 +66,10 @@ class AppConfigSerializer(serializers.ModelSerializer):
 
     def get_welcome_image(self, obj):
         if obj.welcome_image:
-            return obj.welcome_image.url
+            # Force full Cloudinary URL
+            url = obj.welcome_image.url
+            if url.startswith('/media/'):
+                # Image was saved locally, build Cloudinary URL manually
+                return f"https://res.cloudinary.com/{os.environ.get('CLOUDINARY_CLOUD_NAME', 'dbe0l5g7w')}/{url.replace('/media/', '')}"
+            return url
         return None
