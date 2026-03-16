@@ -65,11 +65,11 @@ class AppConfigSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_welcome_image(self, obj):
-        if obj.welcome_image:
-            # Force full Cloudinary URL
-            url = obj.welcome_image.url
-            if url.startswith('/media/'):
-                # Image was saved locally, build Cloudinary URL manually
-                return f"https://res.cloudinary.com/{os.environ.get('CLOUDINARY_CLOUD_NAME', 'dbe0l5g7w')}/{url.replace('/media/', '')}"
-            return url
-        return None
+     if obj.welcome_image:
+        url = obj.welcome_image.url
+        if url.startswith('/media/'):
+            cloud_name = os.environ.get('CLOUDINARY_CLOUD_NAME', 'dbe0l5g7w')
+            path = url.replace('/media/', '')
+            return f"https://res.cloudinary.com/{cloud_name}/image/upload/{path}"
+        return url
+     return None
