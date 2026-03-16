@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import Restaurant, MenuItem, Order, Payment, Profile
+from .models import Restaurant, MenuItem, Order, Payment, Profile, AppConfig  
 from .serializers import (
     RestaurantSerializer, MenuItemSerializer, OrderSerializer, PaymentSerializer
 )
@@ -61,28 +61,24 @@ def start_paystack_payment(request, order_id):
         user_email = f"{request.user.username}@fooddelivery.com"
 
     food_total = sum(item.price for item in order.items.all())
-    delivery_fee = Decimal(15.00)
+    
+    # Get delivery fee from AppConfig instead of hardcoding
+    config = AppConfig.objects.first()
+    delivery_fee = config.delivery_fee if config else Decimal('15.00')
+    
     total = food_total + delivery_fee
-
     order.total_price = total
     order.save()
 
     amount_in_pesewas = int(total * 100)
-
-    res = initialize_transaction(
-        user_email,
-        amount_in_pesewas,
-        order.id
-    )
+    res = initialize_transaction(user_email, amount_in_pesewas, order.id)
 
     if res.get("status"):
         return Response({
             "authorization_url": res["data"]["authorization_url"],
             "reference": res["data"]["reference"]
         })
-
     return Response({"error": res.get("message", "Paystack error")}, status=400)
-
 
 @api_view(['GET'])
 def verify_paystack_payment(request, reference):
