@@ -242,3 +242,14 @@ def debug_cloudinary(request):
         'cloud_name': config.cloud_name,
         'api_key': config.api_key[:5] if config.api_key else None,
     })
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_profile(request):
+    user = request.user
+    return Response({
+        'full_name': user.get_full_name() or user.username,
+        'username': user.username,
+        'email': user.email,
+    })

@@ -31,6 +31,7 @@ urlpatterns = [
 
     path('app-config/', views.get_app_config, name='app-config'),
     path('debug-cloudinary/', views.debug_cloudinary, name='debug-cloudinary'),
+    path('profile/', views.get_user_profile, name='profile'),
 
     
 ]
