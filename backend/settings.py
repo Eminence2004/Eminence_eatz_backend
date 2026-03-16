@@ -1,11 +1,13 @@
 import os
 import json
 import base64
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 from pathlib import Path
 import firebase_admin
 from firebase_admin import credentials
 import dj_database_url
-import cloudinary
 
 # ------------------------------
 # 1. BASE DIRECTORY
@@ -13,17 +15,34 @@ import cloudinary
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ------------------------------
-# 2. SECURITY SETTINGS
+# 2. CLOUDINARY CONFIG (must be early)
+# ------------------------------
+cloudinary.config(
+    cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
+    api_key=os.environ.get('CLOUDINARY_API_KEY'),
+    api_secret=os.environ.get('CLOUDINARY_API_SECRET'),
+)
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
+}
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+# ------------------------------
+# 3. SECURITY SETTINGS
 # ------------------------------
 SECRET_KEY = os.environ.get("SECRET_KEY", "fallback-local-secret-key")
 DEBUG = os.environ.get("DEBUG", "False") == "True"
 ALLOWED_HOSTS = ['*']
 
 # ------------------------------
-# 3. FIREBASE INITIALIZATION
+# 4. FIREBASE INITIALIZATION
 # ------------------------------
-firebase_base64 = os.environ.get("FIREBASE_KEY_BASE64")  # Base64-encoded JSON (optional)
-firebase_json_path = os.path.join(BASE_DIR, "serviceAccountKey.json")  # Local dev
+firebase_base64 = os.environ.get("FIREBASE_KEY_BASE64")
+firebase_json_path = os.path.join(BASE_DIR, "serviceAccountKey.json")
 
 if not firebase_admin._apps:
     if firebase_base64:
@@ -37,10 +56,10 @@ if not firebase_admin._apps:
         print("WARNING: Firebase credentials not found! Firebase Auth will fail.")
 
 # ------------------------------
-# 4. APP DEFINITION
+# 5. APP DEFINITION
 # ------------------------------
 INSTALLED_APPS = [
-    'jazzmin',  # Must be at top
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -49,18 +68,13 @@ INSTALLED_APPS = [
     'cloudinary_storage',
     'django.contrib.staticfiles',
     'cloudinary',
-
-    # Third Party
     'rest_framework',
     'corsheaders',
-    
-
-    # Local Apps
     'orders',
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # Must be first
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -74,7 +88,7 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'backend.urls'
 
 # ------------------------------
-# 5. TEMPLATES
+# 6. TEMPLATES
 # ------------------------------
 TEMPLATES = [
     {
@@ -95,8 +109,8 @@ TEMPLATES = [
 WSGI_APPLICATION = 'backend.wsgi.application'
 
 # ------------------------------
-# 6. DATABASE
-# -----------------------------
+# 7. DATABASE
+# ------------------------------
 DATABASES = {
     'default': dj_database_url.config(
         default=os.environ.get('postgresql://eminence_eatz_db_user:xp6YDE7Sk44Gg5EARblwCbdx0Kj3N1nP@dpg-d6ps0rvgi27c73bfn7d0-a/eminence_eatz_db'),
@@ -104,16 +118,8 @@ DATABASES = {
     )
 }
 
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
-    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
-    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
-}
-
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-
 # ------------------------------
-# 7. REST FRAMEWORK & CORS
+# 8. REST FRAMEWORK & CORS
 # ------------------------------
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -126,14 +132,14 @@ REST_FRAMEWORK = {
 CORS_ALLOW_ALL_ORIGINS = True
 
 # ------------------------------
-# 8. PAYSTACK KEYS
+# 9. PAYSTACK KEYS
 # ------------------------------
 PAYSTACK_PUBLIC_KEY = os.environ.get("PAYSTACK_PUBLIC_KEY")
 PAYSTACK_SECRET_KEY = os.environ.get("PAYSTACK_SECRET_KEY")
 PAYSTACK_BASE_URL = "https://api.paystack.co"
 
 # ------------------------------
-# 9. STATIC & MEDIA
+# 10. STATIC & MEDIA
 # ------------------------------
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
@@ -143,17 +149,18 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-
-
-
+# ------------------------------
+# 11. CACHE
+# ------------------------------
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
         'LOCATION': 'otp_cache_table',
     }
 }
+
 # ------------------------------
-# 10. EMAIL CONFIGURATION
+# 12. EMAIL CONFIGURATION
 # ------------------------------
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.environ.get("EMAIL_HOST")
@@ -163,7 +170,7 @@ EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 
 # ------------------------------
-# 11. JAZZMIN SETTINGS
+# 13. JAZZMIN SETTINGS
 # ------------------------------
 JAZZMIN_SETTINGS = {
     "site_title": "Eminence Eatz Admin",
