@@ -1,30 +1,41 @@
 import os
 from rest_framework import serializers
-from .models import Restaurant, MenuItem, Order, Payment
+from .models import Restaurant, MenuItem, Order, Payment, AppConfig
 from django.contrib.auth.models import User
-from .models import AppConfig 
+
+CLOUDINARY_BASE = f"https://res.cloudinary.com/{os.environ.get('CLOUDINARY_CLOUD_NAME', 'dbe0l5g7w')}/image/upload/"
+
+
+def get_cloudinary_url(image_field):
+    if not image_field:
+        return None
+    value = str(image_field)
+    if value.startswith('http'):
+        return value
+    return f"{CLOUDINARY_BASE}{value}"
 
 
 class MenuItemSerializer(serializers.ModelSerializer):
-    image_url = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
 
     class Meta:
         model = MenuItem
-        fields = ['id', 'restaurant', 'name', 'description', 'price', 'image', 'image_url']
+        fields = ['id', 'restaurant', 'name', 'description', 'price', 'image', 'extra_delivery_fee']
 
-    def get_image_url(self, obj):
-        request = self.context.get('request')
-        if obj.image and hasattr(obj.image, 'url'):
-            return request.build_absolute_uri(obj.image.url) if request else obj.image.url
-        return None
+    def get_image(self, obj):
+        return get_cloudinary_url(obj.image)
 
 
 class RestaurantSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
     menu_items = MenuItemSerializer(many=True, read_only=True)
 
     class Meta:
         model = Restaurant
         fields = '__all__'
+
+    def get_image(self, obj):
+        return get_cloudinary_url(obj.image)
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -65,6 +76,4 @@ class AppConfigSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_welcome_image(self, obj):
-        if obj.welcome_image:
-            return f"https://res.cloudinary.com/{os.environ.get('CLOUDINARY_CLOUD_NAME', 'dbe0l5g7w')}/image/upload/{obj.welcome_image}"
-        return None
+        return get_cloudinary_url(obj.welcome_image)
