@@ -65,6 +65,6 @@ class AppConfigSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_welcome_image(self, obj):
-     if obj.welcome_image:
-        return obj.welcome_image.url
-     return None
+        if obj.welcome_image:
+            return f"https://res.cloudinary.com/{os.environ.get('CLOUDINARY_CLOUD_NAME', 'dbe0l5g7w')}/image/upload/{obj.welcome_image}"
+        return None

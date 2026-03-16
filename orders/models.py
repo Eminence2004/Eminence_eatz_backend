@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import FileExtensionValidator
 from django.utils import timezone
+from cloudinary.models import CloudinaryField
 
 # ---------------------------
 # Restaurant Model
@@ -34,21 +35,20 @@ class MenuItem(models.Model):
 
 
 # ---------------------------
-# Banner-screen Model
+# App Configuration  Model
 # ---------------------------
 class AppConfig(models.Model):
-    welcome_image = models.ImageField(upload_to='app_config/', blank=True, null=True)
+    welcome_image = CloudinaryField('image', blank=True, null=True)
     welcome_title = models.CharField(max_length=100, default="Eminence Eatz")
     welcome_subtitle = models.TextField(default="Order your favorite meals from top restaurants in Ghana.")
     promo_text = models.CharField(max_length=100, default="FREE DELIVERY", blank=True)
-    delivery_fee = models.DecimalField(max_digits=6, decimal_places=2, default=00.00) 
+    delivery_fee = models.DecimalField(max_digits=6, decimal_places=2, default=0.00)
 
     class Meta:
         verbose_name = "App Configuration"
 
     def __str__(self):
         return "App Configuration"
-
 # ---------------------------
 # Order Model
 # ---------------------------
