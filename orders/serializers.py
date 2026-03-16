@@ -66,10 +66,5 @@ class AppConfigSerializer(serializers.ModelSerializer):
 
     def get_welcome_image(self, obj):
      if obj.welcome_image:
-        url = obj.welcome_image.url
-        if url.startswith('/media/'):
-            cloud_name = os.environ.get('CLOUDINARY_CLOUD_NAME', 'dbe0l5g7w')
-            path = url.replace('/media/', '')
-            return f"https://res.cloudinary.com/{cloud_name}/image/upload/{path}"
-        return url
+        return obj.welcome_image.url
      return None
