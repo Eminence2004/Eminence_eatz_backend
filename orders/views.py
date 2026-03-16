@@ -230,3 +230,15 @@ def get_app_config(request):
         'welcome_subtitle': 'Order your favorite meals from top restaurants in Ghana.',
         'promo_text': 'FREE DELIVERY',
     })
+
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def debug_cloudinary(request):
+    import cloudinary
+    config = cloudinary.config()
+    return Response({
+        'cloud_name': config.cloud_name,
+        'api_key': config.api_key[:5] if config.api_key else None,
+    })

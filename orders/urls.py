@@ -30,6 +30,7 @@ urlpatterns = [
     path('verify-payment/<str:reference>/', verify_paystack_payment, name='pay-verify'),
 
     path('app-config/', views.get_app_config, name='app-config'),
+    path('debug-cloudinary/', views.debug_cloudinary, name='debug-cloudinary'),
 
     
 ]
