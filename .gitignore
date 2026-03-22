@@ -1,10 +1,105 @@
-# Firebase Secret Key
+# ============================================
+# 🔥 FIREBASE SECRETS - NEVER COMMIT!
+# ============================================
 serviceAccountKey.json
+firebase_base64.txt
+*.json
+*.pem
+*.key
+*.p12
 
-# Python environment & cache
+# ============================================
+# 🔐 ENVIRONMENT VARIABLES
+# ============================================
+.env
+.env.*
+*.env
+.env.local
+.env.production
+.env.development
+
+# ============================================
+# 🐍 PYTHON
+# ============================================
 __pycache__/
 *.py[cod]
+*$py.class
+*.so
+.Python
 venv/
-.env
+.venv/
+env/
+ENV/
+pyvenv.cfg
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ============================================
+# 📊 DATABASE
+# ============================================
+*.sqlite3
+*.db
 db.sqlite3
-serviceAccountKey.json
+*.db-journal
+
+# ============================================
+# 📝 LOGS
+# ============================================
+*.log
+logs/
+otp_errors.log
+*.log.*
+error.log
+access.log
+
+# ============================================
+# 🎨 DJANGO
+# ============================================
+/staticfiles/
+/media/
+/static/
+*.pid
+*.pot
+*.mo
+.mypy_cache/
+.ruff_cache/
+
+# ============================================
+# 🧪 TESTING
+# ============================================
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+.coverage.*
+coverage.xml
+
+# ============================================
+# 🚀 DEPLOYMENT
+# ============================================
+*.pid
+*.seed
+*.pid.lock
+.render/
+
+# ============================================
+# 📦 PROJECT SPECIFIC
+# ============================================
+/backend/__pycache__/
+/otp_verification/__pycache__/
+/orders/__pycache__/
+migrations/*.pyc
+migrations/__pycache__/
+
+# ============================================
+# 🔑 SECRETS & CREDENTIALS
+# ============================================
+secrets/
+credentials/
+*.secret
+private_key.txt
+*.pem
+*.key
+oauth2.json
