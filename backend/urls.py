@@ -5,7 +5,8 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('orders.urls')),  # your app URLs
+    path('api/', include('orders.urls')),
+    path('otp/', include('otp_verification.urls')),  
 ]
 
 if settings.DEBUG:

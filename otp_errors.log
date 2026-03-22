@@ -1,0 +1,20 @@
+ERROR 2026-03-17 19:44:38,644 services 24792 26780 Error checking balance: 404 Client Error: Not Found for url: https://sms.arkesel.com/api/account/balance
+ERROR 2026-03-17 19:58:50,833 services 24792 9844 Error checking balance: 404 Client Error: Not Found for url: https://sms.arkesel.com/api/account/balance
+ERROR 2026-03-17 21:04:00,661 services 24792 11808 HTTP error sending OTP to 233547327938: 401 Client Error: Unauthorized for url: https://sms.arkesel.com/api/otp/generate
+ERROR 2026-03-17 21:04:00,665 views 24792 11808 Arkesel API key error: Invalid API key. Please check configuration.
+ERROR 2026-03-17 21:17:18,372 services 10484 17888 HTTP error sending OTP to 233547327938: 422 Client Error: Unprocessable Content for url: https://sms.arkesel.com/api/otp/generate
+ERROR 2026-03-17 21:20:07,951 services 10484 17888 HTTP error sending OTP to 233547327938: 422 Client Error: Unprocessable Content for url: https://sms.arkesel.com/api/otp/generate
+ERROR 2026-03-17 21:23:47,134 services 10484 17888 HTTP error sending OTP to 233547327938: 422 Client Error: Unprocessable Content for url: https://sms.arkesel.com/api/otp/generate
+ERROR 2026-03-17 21:47:20,900 services 27116 26008 HTTP error sending OTP to 233547327938: 422 Client Error: Unprocessable Content for url: https://sms.arkesel.com/api/otp/generate
+ERROR 2026-03-17 21:47:26,855 services 27116 14092 HTTP error sending OTP to 233547327938: 422 Client Error: Unprocessable Content for url: https://sms.arkesel.com/api/otp/generate
+ERROR 2026-03-17 21:47:28,842 services 27116 26448 HTTP error sending OTP to 233547327938: 422 Client Error: Unprocessable Content for url: https://sms.arkesel.com/api/otp/generate
+ERROR 2026-03-17 21:47:28,889 services 27116 28336 HTTP error sending OTP to 233547327938: 422 Client Error: Unprocessable Content for url: https://sms.arkesel.com/api/otp/generate
+ERROR 2026-03-17 21:47:28,895 services 27116 26008 HTTP error sending OTP to 233547327938: 422 Client Error: Unprocessable Content for url: https://sms.arkesel.com/api/otp/generate
+ERROR 2026-03-17 21:47:28,921 services 27116 28700 HTTP error sending OTP to 233547327938: 422 Client Error: Unprocessable Content for url: https://sms.arkesel.com/api/otp/generate
+ERROR 2026-03-17 21:47:31,402 services 27116 14092 HTTP error sending OTP to 233547327938: 422 Client Error: Unprocessable Content for url: https://sms.arkesel.com/api/otp/generate
+ERROR 2026-03-17 22:09:47,749 services 27108 24764 HTTP error sending OTP to 233547327938: 401 Client Error: Unauthorized for url: https://sms.arkesel.com/api/otp/generate
+ERROR 2026-03-17 22:11:50,528 services 27108 24764 HTTP error sending OTP to 233547327938: 401 Client Error: Unauthorized for url: https://sms.arkesel.com/api/otp/generate
+ERROR 2026-03-17 22:17:08,284 services 29460 7808 Error checking balance: 404 Client Error: Not Found for url: https://sms.arkesel.com/api/account/balance
+ERROR 2026-03-17 22:17:10,126 services 29460 7808 HTTP error sending OTP to 233547327938: 401 Client Error: Unauthorized for url: https://sms.arkesel.com/api/otp/generate
+ERROR 2026-03-17 22:26:41,633 services 29460 7808 HTTP error sending OTP to 233547327938: 401 Client Error: Unauthorized for url: https://sms.arkesel.com/api/otp/generate
+ERROR 2026-03-19 16:22:00,861 services_clifze 25660 18724 Clifze OTP failed. Status: 400, Response: {'status': 'failed', 'message': "SQLSTATE[01000]: Warning: 1265 Data truncated for column 'source' at row 1"}, Request Data: {'api_key': 'e581a3f1adfb0398b9df203e6c4dcbb0bdd89470527685a0f89bebf697131098', 'sender_id': 'Eminence', 'recipient': '0547327938', 'message': 'Your Eminence verification code is [otp]'}

@@ -5,11 +5,16 @@ from pathlib import Path
 import firebase_admin
 from firebase_admin import credentials
 import dj_database_url
+from dotenv import load_dotenv
 
 # ------------------------------
 # 1. BASE DIRECTORY
 # ------------------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from .env file
+if os.path.exists(os.path.join(BASE_DIR, '.env')):
+    load_dotenv()
 
 # ------------------------------
 # 2. SECURITY SETTINGS
@@ -51,6 +56,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'orders',
+    'otp_verification',
 ]
 
 # ------------------------------
@@ -164,7 +170,20 @@ EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 
 # ------------------------------
-# 14. JAZZMIN SETTINGS
+# 14. CLIFZE OTP CONFIGURATION 
+# ------------------------------
+# Clifze SMS Configuration
+# Clifze SMS Configuration
+CLIFZE_API_KEY = os.environ.get('CLIFZE_API_KEY')  # Get this from your Clifze dashboard
+CLIFZE_SENDER_ID = os.environ.get('CLIFZE_SENDER_ID', 'Eminence')  # Your approved sender ID
+CLIFZE_OTP_EXPIRY = int(os.environ.get('CLIFZE_OTP_EXPIRY', 10))  # Expiry in minutes (default: 10)
+CLIFZE_OTP_LENGTH = 6  # Fixed at 6 digits per their system
+
+OTP_MAX_REQUESTS_PER_DAY = int(os.environ.get("OTP_MAX_REQUESTS_PER_DAY", 10))
+OTP_COOLDOWN_MINUTES = int(os.environ.get("OTP_COOLDOWN_MINUTES", 2))
+
+# ------------------------------
+# 15. JAZZMIN SETTINGS
 # ------------------------------
 JAZZMIN_SETTINGS = {
     "site_title": "Eminence Eatz Admin",
@@ -184,9 +203,49 @@ JAZZMIN_SETTINGS = {
         "auth.user": "fas fa-user",
         "orders.Order": "fas fa-shopping-cart",
         "orders.Restaurant": "fas fa-store",
+        # NEW: Add OTP model icon
+        "otp_verification.otprecord": "fas fa-mobile-alt",
     },
 }
 
 JAZZMIN_UI_TWEAKS = {
     "theme": "flatly",
+}
+
+# ------------------------------
+# 16. LOGGING CONFIGURATION (NEW - Add for debugging OTP)
+# ------------------------------
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'otp_errors.log'),
+            'formatter': 'verbose',
+        },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+    },
+    'loggers': {
+        'otp_verification': {
+            'handlers': ['file', 'console'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+    },
 }
